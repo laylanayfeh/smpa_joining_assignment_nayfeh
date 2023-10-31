@@ -1,6 +1,6 @@
 ---
 title: "Joining Assignment"
-author: "Put Name Here"
+author: "Layla Nayfeh"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 format:
   html:
@@ -43,10 +43,7 @@ Now Combine (stack) the two dataframes into one combined dataframe, so all the r
 
 ```{r}
 
-
-
-
-
+combined_primary <- bind_rows(primary_dem, primary_rep)
 
 ```
 
@@ -60,7 +57,10 @@ To use clean_names() you apply it to your dataframe like:
 
 ```{r}
 
+combined_primary <- combined_primary %>%
+  clean_names()
 
+glimpse(combined_primary)
 
 
 
