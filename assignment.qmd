@@ -81,8 +81,8 @@ Next use left_join() to join the two tables based on the unique combination of p
 ```{r}
 
 
-
-
+joined_data <- left_join(combined_primary, precinct_voting_locations, 
+                         by = c("Election District - Precinct" = "precinct_code", "County" = "county_code"))
 
 
 ```
@@ -95,7 +95,8 @@ Write code to produce a `votes` column which is the result of adding together `e
 
 ```{r}
 
-
+joined_data <- joined_data %>%
+  mutate(total_votes = `Early Votes` + `Election Night Votes` + `Provisional Votes` + `Mail-In Ballot 1 Votes`+ `Mail-In Ballot 2 Votes`)
 
 ```
 
@@ -103,13 +104,19 @@ Next, separately write code to show each county and precinct and calculate the t
 
 ```{r}
 
+governor_race_data <- joined_data %>%
+  filter(`Office Name` == "Governor / Lt. Governor")
 
+governor_votes <- governor_race_data %>%
+  group_by(`County Name`, `Election District - Precinct`) %>%
+  summarize(total_governor_votes = sum(total_votes))
 
+governor_votes 
 
 
 ```
 
-What is the name and voting location of the precinct that saw the most votes in the governor's race? *Put answer here*
+What is the name and voting location of the precinct that saw the most votes in the governor's race? *Prince George's County*
 
 ### Q2.
 
@@ -118,15 +125,28 @@ Let's look at the average number of votes in each party's primary race for gover
 ```{r}
 
 
+average_governor_votes <- governor_race_data %>%
+  group_by(`County Name`, `Election District - Precinct`, `Party`) %>%
+  summarize(average_total_votes = mean(total_votes))
 
+precincts_with_zero_votes <- average_governor_votes %>%
+  filter(average_total_votes == 0)
 
-
+total_precincts <- n_distinct(joined_data$`Election District - Precinct`)
+county_with_most_precincts <- joined_data %>%
+  group_by(`County Name`) %>%
+  summarize(count = n_distinct(`Election District - Precinct`)) %>%
+  arrange(desc(count)) %>%
+  head(1)
+county_name_most_precincts <- county_with_most_precincts$`County Name`
+total_precincts
+county_name_most_precincts
 
 ```
 
-How many precincts are there, and which county has the most? *Put answer here*
+How many precincts are there, and which county has the most? *752, Prince George's County*
 
-What else would you need to know about these precincts to know whether this might be worth a story? *Put answer here*
+What else would you need to know about these precincts to know whether this might be worth a story? *Population and demographic*
 
 ### Q3.
 
@@ -136,8 +156,17 @@ First write the question and then try to answer it by writing code. If you're no
 
 ```{r}
 
+#Which party has higher total votes?
 
+total_votes_by_party <- joined_data %>%
+  group_by(Party) %>%
+  summarize(total_votes = sum(total_votes))
 
+party_with_highest_votes <- total_votes_by_party %>%
+  filter(total_votes == max(total_votes))
+
+total_votes_by_party
+party_with_highest_votes
 
 
 ```
